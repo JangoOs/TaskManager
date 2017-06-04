@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Ywdsoft.Utility
 {
@@ -55,6 +53,10 @@ namespace Ywdsoft.Utility
                         {
                             pro.SetValue(t, Convert.ChangeType(value, Nullable.GetUnderlyingType(pro.PropertyType)), null);
                         }
+                        else if (pro.PropertyType.IsEnum)
+                        {
+                            pro.SetValue(t, Convert.ChangeType(value, Enum.GetUnderlyingType(pro.PropertyType)), null);
+                        }
                         else
                         {
                             pro.SetValue(t, value, null);
@@ -79,7 +81,12 @@ namespace Ywdsoft.Utility
             for (int i = 0; i < properties.Count; i++)
             {
                 PropertyDescriptor property = properties[i];
-                dt.Columns.Add(property.Name, property.PropertyType);
+                Type colType = property.PropertyType;
+                if ((colType.IsGenericType) && (colType.GetGenericTypeDefinition() == typeof(Nullable<>)))
+                {
+                    colType = colType.GetGenericArguments()[0];
+                }
+                dt.Columns.Add(property.Name, colType);
             }
             object[] values = new object[properties.Count];
             foreach (T item in data)

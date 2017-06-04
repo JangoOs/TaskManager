@@ -6,14 +6,13 @@
  * 博客地址：http://yanweidie.cnblogs.com
  */
 using Nancy;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Ywdsoft.Utility;
+using Ywdsoft.Utility.ConfigHandler;
+using Ywdsoft.Utility.Mef;
 
 namespace Ywdsoft.Modules
 {
-    public class HomeModule : NancyModule
+    public class HomeModule : BaseModule
     {
         public HomeModule()
         {
@@ -26,14 +25,32 @@ namespace Ywdsoft.Modules
             //主页
             Get["/Home/Index"] = r =>
             {
-                var model = "我是 Razor 引擎";
-                return View["index", model];
+                return View["index", new { UserName = UserAccountInfo.UserName, Title = SystemConfig.SystemTitle, ProgramName = SystemConfig.ProgramName }];
             };
 
             ///桌面
             Get["/DestTop"] = r =>
             {
-                return View["DestTop"];
+                return View["DestTop", MachineNumber.GetMachineInfo()];
+            };
+
+            //修改密码
+            Post["/Home/ChgPwd"] = r =>
+            {
+                ApiResult<string> result = new ApiResult<string>();
+                string PasswordOne = this.Request.Form.PasswordOne;
+                string PasswordTwo = this.Request.Form.PasswordTwo;
+                IUserService UserService = MefConfig.TryResolve<IUserService>();
+                if (string.IsNullOrEmpty(PasswordOne) || string.IsNullOrEmpty(PasswordTwo) || !PasswordOne.Equals(PasswordTwo))
+                {
+                    result.HasError = true;
+                    result.Message = "两次密码不一致";
+                }
+                else
+                {
+                    UserService.ChgPwd(UserAccountInfo.UserGUID, DESEncrypt.Encrypt(PasswordOne));
+                }
+                return result;
             };
         }
     }

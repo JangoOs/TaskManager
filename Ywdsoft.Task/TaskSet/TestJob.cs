@@ -1,13 +1,9 @@
 ﻿using Ywdsoft.Utility;
 using Quartz;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace Ywdsoft.Task.TaskSet
-{   
+{
     /// <summary>
     /// 测试任务
     /// </summary>
@@ -19,10 +15,7 @@ namespace Ywdsoft.Task.TaskSet
         {
             try
             {
-                //获取任务执行参数,任务启动时会读取配置文件TaskConfig.xml节点TaskParam的值传递过来
-                object objParam = context.JobDetail.JobDataMap.Get("TaskParam");
                 LogHelper.WriteLog("测试任务,当前系统时间:" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-
             }
             catch (Exception ex)
             {

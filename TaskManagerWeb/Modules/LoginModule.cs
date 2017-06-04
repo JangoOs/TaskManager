@@ -7,10 +7,13 @@
  */
 
 using Nancy;
+using Nancy.Authentication.Forms;
+using Nancy.Extensions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Ywdsoft.Model.Common;
+using Ywdsoft.Utility;
+using Ywdsoft.Utility.ConfigHandler;
+using Ywdsoft.Utility.Mef;
 
 namespace Ywdsoft.Modules
 {
@@ -20,15 +23,46 @@ namespace Ywdsoft.Modules
         {
             Get["/"] = r =>
             {
-                var model = "我是 Razor 引擎2";
-                return View["index", model];
+                var ErrorMsg = this.Request.Query.ErrorMsg;
+                var UserCode = this.Request.Query.UserCode;
+                return View["index", new
+                {
+                    ErrorMsg = ErrorMsg,
+                    UserCode = UserCode,
+                    Title = SystemConfig.SystemTitle,
+                    ProgramName = SystemConfig.ProgramName,
+                    ShowOriginalAccountInfo = SystemConfig.ShowOriginalAccountInfo ? "1" : "0"
+                }];
+            };
+
+            Post["/"] = r =>
+            {
+                string UserCode = this.Request.Form.UserCode;
+                string Password = this.Request.Form.Password;
+                IUserService UserService = MefConfig.TryResolve<IUserService>();
+                if (string.IsNullOrEmpty(UserCode) || string.IsNullOrEmpty(Password))
+                {
+
+                    return this.Context.GetRedirect("~/Login?ErrorMsg=" + Uri.EscapeDataString("用户名或密码不能为空") + "&UserCode=" + UserCode);
+                }
+                UserAccount account = UserService.GetUserInfo(UserCode, DESEncrypt.Encrypt(Password));
+                if (account == null)
+                {
+                    return this.Context.GetRedirect("~/Login?ErrorMsg=" + Uri.EscapeDataString("用户名或密码错误") + "&UserCode=" + UserCode);
+                }
+                else
+                {
+                    Guid guid = Guid.ParseExact(account.UserGUID, "N");
+                    Session["UserInfo"] = account;
+                    return this.Login(guid, DateTime.Now.AddMinutes(30));
+                }
             };
 
             //退出登录
             Get["/Exit"] = r =>
             {
-                var model = "我是 Razor 引擎";
-                return View["inde2x", model];
+                Session.DeleteAll();
+                return this.Context.GetRedirect("~/Login");
             };
         }
     }

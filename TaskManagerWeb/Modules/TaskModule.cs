@@ -9,17 +9,10 @@ using Ywdsoft.Utility;
 using Nancy;
 using Nancy.ModelBinding;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Ywdsoft.Modules
 {
-    public class TaskModule : NancyModule
+    public class TaskModule : BaseModule
     {
         public TaskModule() : base("Task")
         {
@@ -34,11 +27,29 @@ namespace Ywdsoft.Modules
                 return View["Edit"];
             };
 
-            //取数接口API
-            #region
+            #region "取数接口API"
+
+            //立即运行一次任务
+            Get["/Run/{Id}"] = r =>
+            {
+                //取出单条记录数据
+                string TaskId = r.Id;
+                ApiResult<string> result = new ApiResult<string>();
+                try
+                {
+                    TaskHelper.RunById(TaskId);
+                }
+                catch (Exception ex)
+                {
+                    result.HasError = true;
+                    result.Message = ex.Message;
+                }
+                return Response.AsJson(result);
+            };
+
             Get["/GetById/{Id}"] = r =>
             {
-                JsonBaseModel<TaskUtil> result = new JsonBaseModel<TaskUtil>();
+                ApiResult<TaskUtil> result = new ApiResult<TaskUtil>();
                 try
                 {
                     //取出单条记录数据
@@ -75,7 +86,7 @@ namespace Ywdsoft.Modules
             //删除任务接口
             Delete["/{Id}"] = r =>
             {
-                JsonBaseModel<string> result = new JsonBaseModel<string>();
+                ApiResult<string> result = new ApiResult<string>();
                 try
                 {
                     string TaskId = r.Id;
@@ -92,7 +103,7 @@ namespace Ywdsoft.Modules
             //更新任务运行状态
             Put["/{Id}/{Status:int}"] = r =>
             {
-                JsonBaseModel<string> result = new JsonBaseModel<string>();
+                ApiResult<string> result = new ApiResult<string>();
                 try
                 {
                     TaskStatus Status = Enum.ToObject(typeof(TaskStatus), r.Status);

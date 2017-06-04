@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Ywdsoft.Utility
+﻿namespace Ywdsoft.Utility
 {
     /// <summary>
     /// 缓存系统所有配置信息，以键值对形式存在
@@ -20,21 +15,21 @@ namespace Ywdsoft.Utility
     public class SysConfig
     {
         /// <summary>
-        /// 数据库连接字符串信息
+        /// Sqlite数据库连接信息
         /// </summary>
-        [PathMap(Key = "SqlConnect")]
-        public static string SqlConnect { get; set; }
+        [PathMap(Key = "SqliteConnect", AppDataDirectoryConvert = true)]
+        public static string SqliteConnect { get; set; }
 
         /// <summary>
-        /// 邮件信息配置
+        /// SqlServer数据库连接信息
         /// </summary>
-        [PathMap(Key = "MailInfo")]
-        public static string MailInfo { get; set; }
+        [PathMap(Key = "SqlServerConnect")]
+        public static string SqlServerConnect { get; set; }
 
         /// <summary>
-        /// 邮件信息配置
+        /// Sql语句存放目录信息
         /// </summary>
-        [PathMap(Key = "WebPort")]
-        public static int WebPort { get; set; }
+        [PathMap(Key = "YwdsoftExt:XmlCommandFolder")]
+        public static string XmlCommandFolder { get; set; }
     }
 }
